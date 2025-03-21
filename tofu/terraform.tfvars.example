@@ -1,0 +1,5 @@
+# För att sätta dina egna värden kopiera denna fil och döp till
+# terraform.tfvars
+
+cloudshell_ip = "<cloudshell-IP>"
+laptop_ip = "<publik IP till din egen dator>"

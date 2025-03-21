@@ -1,0 +1,50 @@
+# Ignore OpenTofu state files and backups
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
+
+# Ignore OpenTofu cache and provider binaries
+.terraform/
+.tofu/
+.terraform.lock.hcl
+
+# Ignore plan output files (temporary and binary)
+*.out
+
+# Ignore environment-specific configuration
+*.tfvars
+*.tfvars.json
+
+# Misc
+*.zip
+
+# Ansible-relaterade filer
+*.retry
+*.log
+*.swp
+*.bak
+*.tmp
+*.lock
+
+# Ansible-vault filer (känslig information)
+*.vault
+*.vault.yml
+secrets.yml
+vault_pass.txt
+
+# SSH-nycklar (ska aldrig läggas i repo!)
+id_rsa*
+tofu-key*
+*.pem
+
+# Inventory-filer (om de innehåller känslig info)
+inventory
+inventory.ini
+*.inventory
+hosts
+
+# System- och editorfiler
+.vscode/
+.DS_Store
+Thumbs.db
