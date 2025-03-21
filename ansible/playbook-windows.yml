@@ -1,0 +1,22 @@
+---
+- name: Simple IIS Setup on Windows
+  hosts: windows
+  gather_facts: false
+
+  tasks:
+    - name: Install IIS
+      ansible.windows.win_feature:
+        name: Web-Server
+        state: present
+
+    - name: Copy index.html to IIS web root
+      ansible.windows.win_copy:
+        src: files/index.html
+        dest: 'C:\inetpub\wwwroot\index.html'
+
+    - name: Test that web page is accessible
+      ansible.windows.win_uri:
+        url: http://localhost
+        return_content: yes
+        validate_certs: no
+      register: result

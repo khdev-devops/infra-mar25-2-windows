@@ -1,0 +1,10 @@
+[windows]
+<byt-ut-med-din-ec2-publika-ip>
+
+[windows:vars]
+ansible_user=Administrator
+ansible_password=<byt-ut-med-ec2-lösenord>
+ansible_connection=winrm
+ansible_port=5985
+ansible_winrm_transport=basic
+ansible_winrm_server_cert_validation=ignore
