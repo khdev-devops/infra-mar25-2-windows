@@ -11,8 +11,96 @@
 
     - name: Copy index.html to IIS web root
       ansible.windows.win_copy:
-        src: files/index.html
-        dest: 'C:\inetpub\wwwroot\index.html'
+        src: files/
+        dest: 'C:\inetpub\wwwroot'
+        recurse: yes
+
+    - name: Render web.config with database password
+      ansible.windows.win_template:
+        src: templates/web.config.j2
+        dest: 'C:\inetpub\wwwroot\web.config'
+
+    - name: Install SQL Server Express using Chocolatey
+      chocolatey.chocolatey.win_chocolatey:
+        name: sql-server-express
+        state: present
+        ignore_checksums: yes
+      register: sql_install
+
+    # - name: Reboot if Chocolatey triggered pending reboot
+    #   ansible.windows.win_reboot:
+    #     reboot_timeout: 900
+    #   when: sql_install.reboot_required
+
+    - name: Start SQL Server Express
+      ansible.windows.win_service:
+        name: MSSQL$SQLEXPRESS
+        start_mode: auto
+        state: started
+
+    - name: Start SQL Server Browser
+      ansible.windows.win_service:
+        name: SQLBrowser
+        start_mode: auto
+        state: started
+
+    # - name: Install sqlcmd using Chocolatey
+    #   chocolatey.chocolatey.win_chocolatey:
+    #     name: sqlcmd
+    #     state: present
+
+    - name: Install Python using Chocolatey
+      chocolatey.chocolatey.win_chocolatey:
+        name: python
+        state: present
+
+    - name: Ensure pymssql is installed via pip
+      ansible.windows.win_shell: |
+        python -m pip install --upgrade pip
+        pip install pymssql
+      args:
+        executable: powershell.exe
+
+    - name: Ensure DemoDB exists
+      community.general.mssql_db:
+        name: DemoDB
+        state: present
+        login_host: localhost\SQLEXPRESS
+        login_user: sa
+        login_password: "{{ sa_password }}"
+
+    - name: Create Visitors table and insert demo rows
+      community.general.mssql_script:
+        login_host: localhost\SQLEXPRESS
+        login_user: sa
+        login_password: "{{ sa_password }}"
+        database: DemoDB
+        script: |
+          IF NOT EXISTS (
+            SELECT * FROM sysobjects WHERE name='Visitors' AND xtype='U'
+          )
+          BEGIN
+            CREATE TABLE Visitors (
+              ID INT IDENTITY(1,1) PRIMARY KEY,
+              Name NVARCHAR(100)
+            );
+
+            INSERT INTO Visitors (Name) VALUES ('Alice'), ('Bob');
+          END
+
+    # - name: Create database and table
+    #   ansible.windows.win_shell: |
+    #     sqlcmd -S localhost\\SQLEXPRESS -U sa -P "{{ sa_password }}" -Q "
+    #       CREATE DATABASE DemoDB;
+    #       USE DemoDB;
+    #       CREATE TABLE Visitors (
+    #         ID INT IDENTITY(1,1) PRIMARY KEY,
+    #         Name NVARCHAR(100)
+    #       );
+    #       INSERT INTO Visitors (Name) VALUES ('Alice'), ('Bob');
+    #     "
+    #   args:
+    #     executable: cmd
 
     - name: Test that web page is accessible
       ansible.windows.win_uri:
