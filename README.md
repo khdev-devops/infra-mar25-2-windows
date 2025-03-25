@@ -140,3 +140,12 @@ ansible/
 ## Resultat
 - En fungerande Windows EC2-instans
 - IIS med enkel webbsida
+
+---
+
+## Städa upp!
+
+Ta bort EC2-instansen och relaterad infrastruktur skapad av OpenTofu (i CloudShell i projektets katalog):
+```bash
+tofu destroy
+```
